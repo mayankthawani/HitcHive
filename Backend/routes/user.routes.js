@@ -24,6 +24,18 @@ router.post('/register', (req, res, next) => {
 
 
 
+router.post('/login', (req, res, next) => {
+    console.log("Request received at /login");
+    next(); // This will pass control to the controller
+
+} , [
+    body('email').isEmail().withMessage('Invalid Email'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be 6 characters long')
+], usercontrolers.loginuser);
+
+
+
+
 
 
 

@@ -20,6 +20,7 @@ app.use((req, res, next) => {
 
 // Register routes
 app.use('/users', userroutes);
+app.use('.users', userroutes);
 
 app.get('/', (req, res) => {
     res.send("Hello world");
