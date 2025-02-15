@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
+const cookie = require('cookie-parser');
 dotenv.config();
 const cors = require('cors');
 const connecttodb = require('./db/db');
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
 // Register routes
 app.use('/users', userroutes);
 app.use('.users', userroutes);
+app.use(cookie());
 
 app.get('/', (req, res) => {
     res.send("Hello world");

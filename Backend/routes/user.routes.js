@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();//idhr se udhr jane ke liye
 const {body} = require('express-validator');
 const usercontrolers = require('../controlers/user.controlers')
+const authmiddleware = require('../middlewares/auth.mddlewares');
 
 router.get('/test', (req, res) => {
     console.log("Test route hit");
@@ -32,6 +33,10 @@ router.post('/login', (req, res, next) => {
     body('email').isEmail().withMessage('Invalid Email'),
     body('password').isLength({ min: 6 }).withMessage('Password must be 6 characters long')
 ], usercontrolers.loginuser);
+
+
+router.get('/profile', authmiddleware.authuser, usercontrolers.getprofile);
+router.get('/logout', authmiddleware.authuser, usercontrolers.logoutuser);
 
 
 
