@@ -6,6 +6,7 @@ dotenv.config();
 const cors = require('cors');
 const connecttodb = require('./db/db');
 const userroutes = require('./routes/user.routes');
+const captainroutes = require('./routes/captain.routes');
 
 app.use(express.json()); // Ensure this is applied before routes
 app.use(express.urlencoded({ extended: true }));
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 // Register routes
 app.use('/users', userroutes);
 app.use('.users', userroutes);
+app.use('/captain' , captainroutes);
 app.use(cookie());
 
 app.get('/', (req, res) => {
