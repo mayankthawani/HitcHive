@@ -2,21 +2,46 @@
 
 
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Userdatacontext } from '../context/Usercontext';
+import axios from 'axios';
 
 const Userlogin = () => {
-  const [email, setemail] = useState('');//useState is a Hook that allows you to have state variables in functional components usestate() ke andr value jo hai wo value input mai hai value ke andr
+  const [email, setemail] = useState('');
   const [pass, setpass] = useState('');
-  const [userdata, setuserdata] = useState({})
-  const submithandler = (e)=>{
-    e.preventDefault();//form ka default setting reload ka hota hai isko rokne ke liye
-    setuserdata({email:email,pass:pass});
-    console.log(userdata);
+  const { user, setuser } = useContext(Userdatacontext);
+  const navigate = useNavigate();
+
+  const submithandler = async (e) => {
+    e.preventDefault();
+    
+    const userdata = { email, password: pass };
+    console.log("Sending login data:", userdata);
+
+    try {
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+      console.log("Base URL:", BASE_URL);
+
+      const response = await axios.post(`${BASE_URL}/users/login`, userdata, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data);
+
+      if (response.status === 200) {
+        setuser(response.data.user);
+        localStorage.setItem('token', response.data.token);
+        navigate("/start");
+      }
+    } catch (error) {
+      console.error("Login error:", error.response?.data || error.message);
+    }
+
     setemail('');
     setpass('');
-  }
+  };
 
   return (
     <div className='flex flex-col justify-center items-center min-h-screen bg-gray-100 px-4'>
@@ -25,12 +50,26 @@ const Userlogin = () => {
         
         <h2 className='text-2xl font-bold text-center mb-6'>Log In to Your Account</h2>
         
-        <form onSubmit={(e)=>{submithandler(e)}}>
+        <form onSubmit={submithandler}>
           <label className='block mb-2 text-gray-700'>Email</label>
-          <input onChange ={(e)=>{setemail(e.target.value)}} type='email' value={email} placeholder='email@example.com' required className='w-full p-3 mb-4 border-2  border-gray-400 rounded bg-gray-100' />
+          <input 
+            onChange={(e) => setemail(e.target.value)} 
+            type='email' 
+            value={email} 
+            placeholder='email@example.com' 
+            required 
+            className='w-full p-3 mb-4 border-2 border-gray-400 rounded bg-gray-100' 
+          />
           
           <label className='block mb-2 text-gray-700'>Password</label>
-          <input onChange ={(e)=>{setpass(e.target.value)}} value={pass} type='password' placeholder='********' required className='w-full p-3 mb-6 border-2 border-gray-400 rounded bg-gray-100' />
+          <input 
+            onChange={(e) => setpass(e.target.value)} 
+            value={pass} 
+            type='password' 
+            placeholder='********' 
+            required 
+            className='w-full p-3 mb-6 border-2 border-gray-400 rounded bg-gray-100' 
+          />
           
           <button className='w-full bg-[#111] text-white font-semibold py-3 rounded text-lg'>Log In</button>
         </form>
@@ -44,6 +83,3 @@ const Userlogin = () => {
 };
 
 export default Userlogin;
-
-
-

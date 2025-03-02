@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState , useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {Userdatacontext} from '../context/Usercontext.jsx'
+
 
 const UserSignup = () => {
   const [email, setemail] = useState('');
@@ -8,16 +12,42 @@ const UserSignup = () => {
   const [firstname, setfirstname] = useState('');
   const [lastname, setlastname] = useState('');
 
-  const submithandler = (e) => {
+  const navigate = useNavigate();
+  const {user, setuser} = React.useContext(Userdatacontext);
+
+  const submithandler = async (e) => {
     e.preventDefault();
-    setuserdata({ username:{firstname: firstname, lastname: lastname} , email: email, pass: pass});
-    console.log(userdata);
-    setfirstname('');
-    setlastname('');
-    setemail('');
-    setpass('');
-    
+  
+    const newuser = {
+      fullname: {firstname : firstname , lastname:lastname}, // Combining first and last name
+      email: email,
+      password: pass,  
+    };
+  
+    try {
+      const BASE_URL = import.meta.env.VITE_BASE_URL; // Load from env
+      console.log("Base URL:", import.meta.env.VITE_BASE_URL);
+      const response = await axios.post(`${BASE_URL}/users/register`, newuser, {
+       headers: { 'Content-Type': 'application/json' }
+});
+  
+      console.log(response.data);
+  
+      if (response.status === 201) {
+        setuser(response.data.user);
+        localStorage.setItem("token", response.data.token);
+        navigate("/start");
+      }
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+    }
+  
+    setfirstname("");
+    setlastname("");
+    setemail("");
+    setpass("");
   };
+  
 
   return (
     <div className="relative flex flex-col justify-center items-center min-h-screen bg-gray-100 px-4">
@@ -53,7 +83,7 @@ const UserSignup = () => {
             className="w-full p-3 mb-6 border-2 border-gray-400 rounded bg-gray-100"
           />
 
-          <button className="w-full bg-[#111] text-white font-semibold py-3 rounded text-lg">Log In</button>
+          <button className="w-full bg-[#111] text-white font-semibold py-3 rounded text-lg">Create account</button>
         </form>
 
         <p className="text-center mt-4">

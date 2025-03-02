@@ -1,15 +1,36 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { CaptainDataContext } from '../context/Captaincontext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 const Captainlogin = () => {
 
     const [email, setemail] = useState('');//useState is a Hook that allows you to have state variables in functional components usestate() ke andr value jo hai wo value input mai hai value ke andr
     const [pass, setpass] = useState('');
-    const [captaindata, setcaptaindata] = useState({})
-    const submithandler = (e)=>{
+    //const [captaindata, setcaptaindata] = useState({})
+    const {captain, setCaptain} =React.useContext(CaptainDataContext);
+      const [errorMessage, setErrorMessage] = useState(""); // For UI error handling
+    const navigate = useNavigate();
+
+    const submithandler = async (e)=>{
       e.preventDefault();//form ka default setting reload ka hota hai isko rokne ke liye
-      setcaptaindata({email:email,pass:pass});
-      console.log(captaindata);
+      const captain = {email:email,password:pass};
+      try{
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+        const response = await axios.post(`${BASE_URL}/captain/login`,captain,{
+          headers:{'Content-Type':'application/json'}
+        });
+        if(response.status === 200){
+          setCaptain(response.data.captain);
+          localStorage.setItem('token',response.data.token);
+          navigate('/cstart');
+        }}catch (error) {
+          setErrorMessage(error.response?.data?.message || "Signup failed. Try again.");
+          console.error("Error:", error.response?.data || error.message);
+        }
+
+      
       setemail('');
       setpass('');
     }
@@ -20,6 +41,10 @@ const Captainlogin = () => {
         <img src='/images/hitchhive-logo.png' alt='HitchHive Logo' className='w-16 mx-auto mb-4' />
         
         <h2 className='text-2xl font-bold text-center mb-6'>Log In to Your Account</h2>
+        {errorMessage && (
+          <p className="text-red-500 text-center mb-4">{errorMessage}</p>
+        )}
+
         
         <form onSubmit={(e)=>{submithandler(e)}}>
           <label className='block mb-2 text-gray-700'>Email</label>
